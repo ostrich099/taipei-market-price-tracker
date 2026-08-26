@@ -27,7 +27,8 @@
 - [ ] 太平市場實際零售價比對（規劃中）
 
 ## 如何執行
-​```bash
+​
+```bash
 pip install requests pandas
 python src/fetch_prices.py
-​```
+```
