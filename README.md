@@ -39,3 +39,8 @@
 - [x] 每日自動排程（GitHub Actions）
 - [ ] 資料趨勢視覺化呈現
 - [ ] 太平市場實際零售價比對（規劃中）
+
+## 🎨 Prototype
+
+Figma 設計稿：
+https://reurl.cc/8YX4po
