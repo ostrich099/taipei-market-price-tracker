@@ -29,16 +29,13 @@ CREATE TABLE IF NOT EXISTS prices (
 )
 """)
 conn.commit()
-
 print("成功讀取菜品主檔！")
 
 market = "台北一"
-# 只抓最近4天（今天往前推），不再寫死固定日期
+
+# 只抓最近4天（今天往前推），民國年 = 西元年 - 1911
 today = datetime.today()
-start_date = (today - timedelta(days=4)).strftime("%y.%m.%d")
-end_date = today.strftime("%y.%m.%d")
-# 民國年轉換：西元年減1911
-start_date = f"{today.year - 1911 - (4 // 365)}.{(today - timedelta(days=4)).strftime('%m.%d')}"
+start_date = f"{today.year - 1911}.{(today - timedelta(days=4)).strftime('%m.%d')}"
 end_date = f"{today.year - 1911}.{today.strftime('%m.%d')}"
 
 new_count = 0
@@ -75,10 +72,10 @@ for _, row in df.iterrows():
                 except sqlite3.IntegrityError:
                     # 已經存在同一筆資料，跳過
                     skip_count += 1
+
     except requests.exceptions.RequestException as e:
         print(f"{chinese_name}({official_name}) - 連線失敗，跳過這項: {e}")
 
 conn.commit()
 conn.close()
-
 print(f"\n完成！新增 {new_count} 筆資料，略過 {skip_count} 筆重複資料。")
