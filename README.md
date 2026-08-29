@@ -44,7 +44,6 @@
 - [x] Figma介面規劃稿（含產品差異化定位分析）
 - [ ] 太平市場實際零售價比對（規劃中）
 
-## 🎨 Prototype
+## 🎨 介面設計稿（Figma Wireframe）
 
-Figma 設計稿：
-https://reurl.cc/8YX4po
+![食價寶寶主畫面](assets/figma-home.png)
