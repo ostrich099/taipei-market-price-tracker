@@ -2,9 +2,6 @@
 .venv/
 .venv-1/
 
-# 資料庫
-data/prices.db
-
 # Python 快取
 __pycache__/
 *.pyc
