@@ -13,7 +13,6 @@ db_path = base_dir / "data" / "prices.db"
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 
-# 建立資料表（如果不存在），設定唯一鍵避免重複
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS prices (
     口語名稱 TEXT,
@@ -24,6 +23,7 @@ CREATE TABLE IF NOT EXISTS prices (
     中價 REAL,
     下價 REAL,
     平均價 REAL,
+    平均價_台斤 REAL,
     交易量 REAL,
     UNIQUE(口語名稱, 交易日期, 作物名稱, 市場名稱)
 )
@@ -61,16 +61,18 @@ for _, row in df.iterrows():
             data = response.json()
             for item in data:
                 try:
+                    avg_price_kg = item["平均價"]
+                    avg_price_taijin = round(avg_price_kg * 0.6, 2) if avg_price_kg is not None else None
+
                     cursor.execute("""
-                        INSERT INTO prices (口語名稱, 交易日期, 作物名稱, 市場名稱, 上價, 中價, 下價, 平均價, 交易量)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO prices (口語名稱, 交易日期, 作物名稱, 市場名稱, 上價, 中價, 下價, 平均價, 平均價_台斤, 交易量)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, (
                         chinese_name, item["交易日期"], item["作物名稱"], item["市場名稱"],
-                        item["上價"], item["中價"], item["下價"], item["平均價"], item["交易量"]
+                        item["上價"], item["中價"], item["下價"], avg_price_kg, avg_price_taijin, item["交易量"]
                     ))
                     new_count += 1
                 except sqlite3.IntegrityError:
-                    # 已經存在同一筆資料，跳過
                     skip_count += 1
 
     except requests.exceptions.RequestException as e:
