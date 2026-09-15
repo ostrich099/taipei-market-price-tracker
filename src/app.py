@@ -47,9 +47,34 @@ else:
     latest_price = daily_avg[price_col].iloc[-1]
     st.metric(label=f"{selected_crop} 目前平均批發價", value=f"${latest_price:.1f} /{unit_label}")
 
+    # ---- 日期選擇器：查特定某天的價格 ----
+    st.subheader("📅 查特定日期的價格")
+
+    date_list = daily_avg["交易日期"].tolist()
+    selected_date = st.selectbox("選擇日期", options=date_list, index=len(date_list) - 1)
+
+    date_price = daily_avg.loc[daily_avg["交易日期"] == selected_date, price_col].iloc[0]
+    st.metric(label=f"{selected_date} {selected_crop} 平均價", value=f"${date_price:.1f} /{unit_label}")
+
+    # ---- 折線圖：趨勢，滑鼠移上去可看到每天數字 ----
     st.subheader("📈 近期價格趨勢")
+    st.caption("滑鼠移到圖上的點，可以看到當天日期與價格")
+
     fig = px.line(daily_avg, x="交易日期", y=price_col, markers=True)
     fig.update_layout(yaxis_title=axis_label, xaxis_title="交易日期")
+    fig.update_traces(
+        hovertemplate="日期: %{x}<br>價格: %{y:.1f} 元<extra></extra>"
+    )
     st.plotly_chart(fig, width='stretch')
+
+    # ---- 資料表格：可捲動查看所有日期 ----
+    st.subheader("📋 每日價格明細")
+
+    table_df = daily_avg.rename(columns={
+        "交易日期": "日期",
+        price_col: f"平均價 (元/{unit_label})"
+    }).sort_values("日期", ascending=False)
+
+    st.dataframe(table_df, width='stretch', hide_index=True)
 
     st.caption("資料來源：農業部台北一批發市場｜批發價僅供趨勢參考，非零售實際售價")
