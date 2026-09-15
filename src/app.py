@@ -21,6 +21,10 @@ st.caption("今天貴不貴，先問價寶寶")
 crop_list = sorted(df["口語名稱"].unique())
 selected_crop = st.selectbox("選擇食材", crop_list)
 
+# 市場選擇
+market_options = ["雙北綜合", "台北一", "台北二"]
+selected_market = st.radio("選擇市場", market_options, horizontal=True)
+
 # 單位切換
 unit = st.radio("價格單位", ["公斤", "台斤"], horizontal=True)
 
@@ -34,18 +38,22 @@ else:
     unit_label = "台斤"
     axis_label = "平均價 (元/台斤)"
 
-# 篩選出選定品項的資料，並排除「休市」（平均價為0）的紀錄
-filtered = df[(df["口語名稱"] == selected_crop) & (df["平均價"] > 0)].copy()
+# 篩選出選定品項＋選定市場的資料，並排除「休市」（平均價為0）的紀錄
+filtered = df[
+    (df["口語名稱"] == selected_crop) &
+    (df["市場名稱"] == selected_market) &
+    (df["平均價"] > 0)
+].copy()
 
 if filtered.empty:
-    st.warning("目前沒有這個品項的有效價格資料。")
+    st.warning("目前沒有這個品項在此市場的有效價格資料。")
 else:
     # 依交易日期排序，並用平均價做整體平均（若有多品種則取當日平均）
     daily_avg = filtered.groupby("交易日期")[price_col].mean().reset_index()
     daily_avg = daily_avg.sort_values("交易日期")
 
     latest_price = daily_avg[price_col].iloc[-1]
-    st.metric(label=f"{selected_crop} 目前平均批發價", value=f"${latest_price:.1f} /{unit_label}")
+    st.metric(label=f"{selected_crop}（{selected_market}）目前平均批發價", value=f"${latest_price:.1f} /{unit_label}")
 
     # ---- 日期選擇器：查特定某天的價格 ----
     st.subheader("📅 查特定日期的價格")
@@ -77,4 +85,4 @@ else:
 
     st.dataframe(table_df, width='stretch', hide_index=True)
 
-    st.caption("資料來源：農業部台北一批發市場｜批發價僅供趨勢參考，非零售實際售價")
+    st.caption(f"資料來源：農業部台北一、台北二批發市場｜目前顯示「{selected_market}」數據，僅供趨勢參考，非零售實際售價")
