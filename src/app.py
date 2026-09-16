@@ -3,6 +3,7 @@ import sqlite3
 import pandas as pd
 import streamlit as st
 import plotly.express as px
+import plotly.graph_objects as go
 
 st.set_page_config(page_title="食價寶寶", page_icon="🥬")
 
@@ -66,14 +67,40 @@ else:
 
     # ---- 折線圖：趨勢，滑鼠移上去可看到每天數字 ----
     st.subheader("📈 近期價格趨勢")
-    st.caption("滑鼠移到圖上的點，可以看到當天日期與價格")
+    st.caption("滑鼠移到圖上的點，可以看到當天日期與價格；淺色區塊代表當天上價～下價的波動範圍")
 
-    fig = px.line(daily_avg, x="交易日期", y=price_col, markers=True)
-    fig.update_layout(yaxis_title=axis_label, xaxis_title="交易日期")
-    fig.update_traces(
+    # 準備上價、下價的資料（要跟公斤/台斤單位一致）
+    if unit == "公斤":
+        high_col, low_col = "上價", "下價"
+    else:
+        filtered["上價_台斤"] = (filtered["上價"] * 0.6).round(2)
+        filtered["下價_台斤"] = (filtered["下價"] * 0.6).round(2)
+        high_col, low_col = "上價_台斤", "下價_台斤"
+
+    daily_range = filtered.groupby("交易日期")[[high_col, low_col]].mean().reset_index()
+    daily_avg = daily_avg.merge(daily_range, on="交易日期")
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+        x=daily_avg["交易日期"], y=daily_avg[high_col],
+        line=dict(width=0), showlegend=False, hoverinfo='skip'
+    ))
+    fig.add_trace(go.Scatter(
+        x=daily_avg["交易日期"], y=daily_avg[low_col],
+        fill='tonexty', fillcolor='rgba(0, 123, 255, 0.15)',
+        line=dict(width=0), name="價格波動範圍",
+        hoverinfo='skip'
+    ))
+    fig.add_trace(go.Scatter(
+        x=daily_avg["交易日期"], y=daily_avg[price_col],
+        mode="lines+markers", name="平均價",
+        line=dict(color="royalblue", width=2),
         hovertemplate="日期: %{x}<br>價格: %{y:.1f} 元<extra></extra>"
-    )
-    st.plotly_chart(fig, width='stretch')
+    ))
+
+    fig.update_layout(yaxis_title=axis_label, xaxis_title="交易日期")
+    st.plotly_chart(fig, width='stretch', config={'displayModeBar': False})
 
     # ---- 資料表格：可捲動查看所有日期 ----
     st.subheader("📋 每日價格明細")
