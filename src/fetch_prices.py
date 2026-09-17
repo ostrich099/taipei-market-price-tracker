@@ -35,7 +35,8 @@ markets = ["台北一", "台北二"]
 
 # 只抓最近4天（今天往前推），民國年 = 西元年 - 1911
 today = datetime.today()
-start_date = f"{today.year - 1911}.{(today - timedelta(days=4)).strftime('%m.%d')}"
+start_dt = today - timedelta(days=4)
+start_date = f"{start_dt.year - 1911}.{start_dt.strftime('%m.%d')}"
 end_date = f"{today.year - 1911}.{today.strftime('%m.%d')}"
 
 new_count = 0
