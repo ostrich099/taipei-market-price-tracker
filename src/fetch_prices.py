@@ -39,6 +39,10 @@ start_dt = today - timedelta(days=4)
 start_date = f"{start_dt.year - 1911}.{start_dt.strftime('%m.%d')}"
 end_date = f"{today.year - 1911}.{today.strftime('%m.%d')}"
 
+
+print(f"【除錯資訊】程式判斷的今天日期是: {today}")
+print(f"【除錯資訊】抓取區間: {start_date} ~ {end_date}")
+
 new_count = 0
 skip_count = 0
 
